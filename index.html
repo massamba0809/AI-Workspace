@@ -12,7 +12,7 @@
 
 <div class="app">
 
-    <!--BARRE LATÉRALE -->
+    <!-- ============ BARRE LATÉRALE ============ -->
     <aside class="sidebar">
         <div class="sidebar__brand">
             <span class="sidebar__brand-mark">AI</span>
@@ -21,31 +21,24 @@
 
         <nav class="sidebar__nav">
             <button class="nav-item is-active" data-view="dashboard">
-                <span class="nav-item__icon">▤</span>
                 <span>Tableau de bord</span>
             </button>
             <button class="nav-item" data-view="chat">
-                <span class="nav-item__icon">💬</span>
                 <span>Chat</span>
             </button>
             <button class="nav-item" data-view="resume">
-                <span class="nav-item__icon">📝</span>
                 <span>Résumé de texte</span>
             </button>
             <button class="nav-item" data-view="classification">
-                <span class="nav-item__icon">🏷️</span>
                 <span>Classification</span>
             </button>
             <button class="nav-item" data-view="traduction">
-                <span class="nav-item__icon">🌐</span>
                 <span>Traduction</span>
             </button>
             <button class="nav-item" data-view="prediction">
-                <span class="nav-item__icon">📈</span>
                 <span>Prédiction</span>
             </button>
             <button class="nav-item" data-view="historique">
-                <span class="nav-item__icon">🕓</span>
                 <span>Historique</span>
             </button>
         </nav>
@@ -55,7 +48,7 @@
         </div>
     </aside>
 
-    <!--ZONE PRINCIPALE-->
+    <!-- ============ ZONE PRINCIPALE ============ -->
     <div class="main">
 
         <!-- Entête -->
@@ -67,9 +60,9 @@
             </div>
         </header>
 
-        <!-- Contenu dynamique  -->
+        <!-- Contenu dynamique : rempli par script.js selon le module actif -->
         <main class="content" id="mainContent">
-            <!-- Le Tableau de bord -->
+            <!-- Le Tableau de bord (module par défaut) sera injecté ici par script.js -->
         </main>
 
     </div>
