@@ -1,10 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Workspace</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
+<div class="app">
+
+    <!--BARRE LATÉRALE -->
+    <aside class="sidebar">
+        <div class="sidebar__brand">
+            <span class="sidebar__brand-mark">AI</span>
+            <span class="sidebar__brand-name">Workspace</span>
+        </div>
+
+        <nav class="sidebar__nav">
+            <button class="nav-item is-active" data-view="dashboard">
+                <span class="nav-item__icon">▤</span>
+                <span>Tableau de bord</span>
+            </button>
+            <button class="nav-item" data-view="chat">
+                <span class="nav-item__icon">💬</span>
+                <span>Chat</span>
+            </button>
+            <button class="nav-item" data-view="resume">
+                <span class="nav-item__icon">📝</span>
+                <span>Résumé de texte</span>
+            </button>
+            <button class="nav-item" data-view="classification">
+                <span class="nav-item__icon">🏷️</span>
+                <span>Classification</span>
+            </button>
+            <button class="nav-item" data-view="traduction">
+                <span class="nav-item__icon">🌐</span>
+                <span>Traduction</span>
+            </button>
+            <button class="nav-item" data-view="prediction">
+                <span class="nav-item__icon">📈</span>
+                <span>Prédiction</span>
+            </button>
+            <button class="nav-item" data-view="historique">
+                <span class="nav-item__icon">🕓</span>
+                <span>Historique</span>
+            </button>
+        </nav>
+
+        <div class="sidebar__footer">
+            <p>Services simulés côté client.<br>Branchables à FastAPI, OpenAI, Hugging Face, Ollama…</p>
+        </div>
+    </aside>
+
+    <!--ZONE PRINCIPALE-->
+    <div class="main">
+
+        <!-- Entête -->
+        <header class="topbar">
+            <h1 class="topbar__title" id="viewTitle">Tableau de bord</h1>
+            <div class="topbar__user">
+                <span class="topbar__user-name">Admin User</span>
+                <span class="topbar__avatar">AU</span>
+            </div>
+        </header>
+
+        <!-- Contenu dynamique  -->
+        <main class="content" id="mainContent">
+            <!-- Le Tableau de bord -->
+        </main>
+
+    </div>
+</div>
+
+<script src="js/script.js"></script>
 </body>
 </html>
