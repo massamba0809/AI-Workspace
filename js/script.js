@@ -1,9 +1,3 @@
-/* =========================================================
-   AI WORKSPACE — script.js
-   Les modules de la zone principale sont générés dynamiquement
-   en fonction de l'élément du menu sélectionné.
-   ========================================================= */
-
 const mainContent = document.getElementById("mainContent");
 const viewTitle = document.getElementById("viewTitle");
 const navItems = document.querySelectorAll(".nav-item");
@@ -18,9 +12,6 @@ const VIEW_TITLES = {
     historique: "Historique",
 };
 
-/* ---------------------------------------------------------
-   NAVIGATION : bascule entre les modules
-   --------------------------------------------------------- */
 function goToView(name) {
     navItems.forEach(btn => btn.classList.toggle("is-active", btn.dataset.view === name));
     viewTitle.textContent = VIEW_TITLES[name] || "";
@@ -32,6 +23,9 @@ function goToView(name) {
         case "resume":
             renderResume();
             break;
+        case "traduction":
+            renderTraduction();
+            break;
         default:
             renderAVenir(name);
     }
@@ -41,9 +35,6 @@ navItems.forEach(btn => {
     btn.addEventListener("click", () => goToView(btn.dataset.view));
 });
 
-/* ---------------------------------------------------------
-   VUE PAR DÉFAUT : TABLEAU DE BORD (provisoire)
-   --------------------------------------------------------- */
 function renderDashboard() {
     mainContent.innerHTML = `
     <p class="view-subtitle">Bienvenue sur votre espace de travail intelligent.</p>
@@ -55,9 +46,6 @@ function renderDashboard() {
   `;
 }
 
-/* ---------------------------------------------------------
-   VUES PAS ENCORE CONSTRUITES
-   --------------------------------------------------------- */
 function renderAVenir(name) {
     mainContent.innerHTML = `
     <div class="panel">
@@ -67,9 +55,6 @@ function renderAVenir(name) {
   `;
 }
 
-/* ---------------------------------------------------------
-   PARTIE 3 — RÉSUMÉ DE TEXTE
-   --------------------------------------------------------- */
 function renderResume() {
     mainContent.innerHTML = `
     <p class="view-subtitle">Collez un texte long, obtenez-en un résumé simulé.</p>
@@ -97,14 +82,52 @@ function renderResume() {
     });
 }
 
-// Simulation : garde les deux premières phrases du texte
 function resumerTexte(texte) {
     const phrases = texte.split(/(?<=[.!?])\s+/).filter(Boolean);
     if (phrases.length <= 2) return texte.trim();
     return phrases.slice(0, 2).join(" ") + " […]";
 }
 
-/* ---------------------------------------------------------
-   INITIALISATION
-   --------------------------------------------------------- */
+function renderTraduction() {
+    mainContent.innerHTML = `
+    <p class="view-subtitle">Traduisez un texte vers la langue de votre choix (simulation).</p>
+
+    <div class="card-form">
+      <label class="field-label" for="traductionInput">Texte à traduire</label>
+      <textarea id="traductionInput" rows="6" placeholder="Saisissez votre texte…"></textarea>
+
+      <label class="field-label" for="traductionLangue">Langue cible</label>
+      <select id="traductionLangue">
+        <option value="Anglais">Anglais</option>
+        <option value="Espagnol">Espagnol</option>
+        <option value="Wolof">Wolof</option>
+        <option value="Arabe">Arabe</option>
+        <option value="Allemand">Allemand</option>
+      </select>
+
+      <button class="btn btn--primary" id="traductionBtn">Traduire</button>
+
+      <div class="result-box" id="traductionResult" hidden>
+        <h3 class="result-box__title">Traduction</h3>
+        <p id="traductionOutput"></p>
+      </div>
+    </div>
+  `;
+
+    document.getElementById("traductionBtn").addEventListener("click", () => {
+        const input = document.getElementById("traductionInput");
+        const texte = input.value.trim();
+        const langue = document.getElementById("traductionLangue").value;
+        if (!texte) { input.focus(); return; }
+
+        const resultat = traduireTexte(texte, langue);
+        document.getElementById("traductionOutput").textContent = resultat;
+        document.getElementById("traductionResult").hidden = false;
+    });
+}
+
+function traduireTexte(texte, langue) {
+    return `[${langue}] ${texte}`;
+}
+
 renderDashboard();
