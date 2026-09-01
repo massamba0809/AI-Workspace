@@ -1,3 +1,5 @@
+
+
 const mainContent = document.getElementById("mainContent");
 const viewTitle = document.getElementById("viewTitle");
 const navItems = document.querySelectorAll(".nav-item");
@@ -12,6 +14,9 @@ const VIEW_TITLES = {
     historique: "Historique",
 };
 
+/* ---------------------------------------------------------
+   NAVIGATION : bascule entre les modules
+   --------------------------------------------------------- */
 function goToView(name) {
     navItems.forEach(btn => btn.classList.toggle("is-active", btn.dataset.view === name));
     viewTitle.textContent = VIEW_TITLES[name] || "";
@@ -26,6 +31,9 @@ function goToView(name) {
         case "traduction":
             renderTraduction();
             break;
+        case "chat":
+            renderChat();
+            break;
         default:
             renderAVenir(name);
     }
@@ -34,6 +42,7 @@ function goToView(name) {
 navItems.forEach(btn => {
     btn.addEventListener("click", () => goToView(btn.dataset.view));
 });
+
 
 function renderDashboard() {
     mainContent.innerHTML = `
@@ -45,6 +54,7 @@ function renderDashboard() {
     </div>
   `;
 }
+
 
 function renderAVenir(name) {
     mainContent.innerHTML = `
@@ -82,6 +92,7 @@ function renderResume() {
     });
 }
 
+// Simulation : garde les deux premières phrases du texte
 function resumerTexte(texte) {
     const phrases = texte.split(/(?<=[.!?])\s+/).filter(Boolean);
     if (phrases.length <= 2) return texte.trim();
@@ -126,8 +137,77 @@ function renderTraduction() {
     });
 }
 
+// Simulation : préfixe le texte avec la langue cible choisie
 function traduireTexte(texte, langue) {
     return `[${langue}] ${texte}`;
 }
+
+
+const REPONSES_SIMULEES = [
+    "C'est une excellente question, laissez-moi y réfléchir.",
+    "D'après mes données simulées, la réponse serait oui.",
+    "Je n'ai pas assez d'informations, pouvez-vous préciser ?",
+    "Voici une piste : essayez de reformuler votre demande.",
+    "Intéressant ! Voulez-vous que je développe ce point ?",
+];
+
+function renderChat() {
+    mainContent.innerHTML = `
+    <div class="chat-page">
+      <div class="chat-scroll" id="chatMessages">
+        ${chatMessageMarkup("bot", "Bonjour ! Posez-moi une question, je vous répondrai (réponse simulée).")}
+      </div>
+
+      <form class="chat-composer" id="chatForm">
+        <textarea id="chatInput" rows="1" placeholder="Écrivez votre message…" autocomplete="off"></textarea>
+        <button type="submit" class="chat-send-btn" aria-label="Envoyer">↑</button>
+      </form>
+    </div>
+  `;
+
+    const chatMessages = document.getElementById("chatMessages");
+    const chatInput = document.getElementById("chatInput");
+
+    chatInput.addEventListener("input", () => {
+        chatInput.style.height = "auto";
+        chatInput.style.height = Math.min(chatInput.scrollHeight, 160) + "px";
+    });
+
+    chatInput.addEventListener("keydown", e => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            document.getElementById("chatForm").requestSubmit();
+        }
+    });
+
+    document.getElementById("chatForm").addEventListener("submit", e => {
+        e.preventDefault();
+        const message = chatInput.value.trim();
+        if (!message) return;
+
+        chatMessages.insertAdjacentHTML("beforeend", chatMessageMarkup("user", message));
+
+        chatInput.value = "";
+        chatInput.style.height = "auto";
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        setTimeout(() => {
+            const reponse = REPONSES_SIMULEES[Math.floor(Math.random() * REPONSES_SIMULEES.length)];
+            chatMessages.insertAdjacentHTML("beforeend", chatMessageMarkup("bot", reponse));
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, 350);
+    });
+}
+
+function chatMessageMarkup(role, texte) {
+    const avatar = role === "bot" ? "IA" : "Moi";
+    return `
+    <div class="chat-message chat-message--${role}">
+      <span class="chat-avatar chat-avatar--${role}">${avatar}</span>
+      <div class="chat-message__body">${texte}</div>
+    </div>
+  `;
+}
+
 
 renderDashboard();
