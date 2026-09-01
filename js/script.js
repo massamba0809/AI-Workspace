@@ -1,4 +1,8 @@
-
+/* =========================================================
+   AI WORKSPACE — script.js
+   Les modules de la zone principale sont générés dynamiquement
+   en fonction de l'élément du menu sélectionné.
+   ========================================================= */
 
 const mainContent = document.getElementById("mainContent");
 const viewTitle = document.getElementById("viewTitle");
@@ -34,6 +38,9 @@ function goToView(name) {
         case "chat":
             renderChat();
             break;
+        case "prediction":
+            renderPrediction();
+            break;
         default:
             renderAVenir(name);
     }
@@ -43,7 +50,9 @@ navItems.forEach(btn => {
     btn.addEventListener("click", () => goToView(btn.dataset.view));
 });
 
-
+/* ---------------------------------------------------------
+   VUE PAR DÉFAUT : TABLEAU DE BORD (provisoire)
+   --------------------------------------------------------- */
 function renderDashboard() {
     mainContent.innerHTML = `
     <p class="view-subtitle">Bienvenue sur votre espace de travail intelligent.</p>
@@ -55,7 +64,9 @@ function renderDashboard() {
   `;
 }
 
-
+/* ---------------------------------------------------------
+   VUES PAS ENCORE CONSTRUITES
+   --------------------------------------------------------- */
 function renderAVenir(name) {
     mainContent.innerHTML = `
     <div class="panel">
@@ -65,6 +76,9 @@ function renderAVenir(name) {
   `;
 }
 
+/* ---------------------------------------------------------
+   PARTIE 3 — RÉSUMÉ DE TEXTE
+   --------------------------------------------------------- */
 function renderResume() {
     mainContent.innerHTML = `
     <p class="view-subtitle">Collez un texte long, obtenez-en un résumé simulé.</p>
@@ -99,6 +113,9 @@ function resumerTexte(texte) {
     return phrases.slice(0, 2).join(" ") + " […]";
 }
 
+/* ---------------------------------------------------------
+   PARTIE 4 — TRADUCTION
+   --------------------------------------------------------- */
 function renderTraduction() {
     mainContent.innerHTML = `
     <p class="view-subtitle">Traduisez un texte vers la langue de votre choix (simulation).</p>
@@ -142,7 +159,9 @@ function traduireTexte(texte, langue) {
     return `[${langue}] ${texte}`;
 }
 
-
+/* ---------------------------------------------------------
+   PARTIE 5 — CHAT IA
+   --------------------------------------------------------- */
 const REPONSES_SIMULEES = [
     "C'est une excellente question, laissez-moi y réfléchir.",
     "D'après mes données simulées, la réponse serait oui.",
@@ -209,5 +228,56 @@ function chatMessageMarkup(role, texte) {
   `;
 }
 
+/* ---------------------------------------------------------
+   PARTIE 6 — PRÉDICTION
+   --------------------------------------------------------- */
+function renderPrediction() {
+    mainContent.innerHTML = `
+    <p class="view-subtitle">Estimez une prédiction fictive à partir de quelques informations.</p>
 
+    <div class="card-form">
+      <label class="field-label" for="predAge">Âge</label>
+      <input type="number" id="predAge" min="0" placeholder="Ex : 27">
+
+      <label class="field-label" for="predRevenu">Revenu mensuel (FCFA)</label>
+      <input type="number" id="predRevenu" min="0" placeholder="Ex : 250000">
+
+      <label class="field-label" for="predVille">Ville</label>
+      <input type="text" id="predVille" placeholder="Ex : Dakar">
+
+      <button class="btn btn--primary" id="predBtn">Prédire</button>
+
+      <div class="result-box" id="predResult" hidden>
+        <h3 class="result-box__title">Prédiction</h3>
+        <p id="predOutput"></p>
+      </div>
+    </div>
+  `;
+
+    document.getElementById("predBtn").addEventListener("click", () => {
+        const age = document.getElementById("predAge").value;
+        const revenu = document.getElementById("predRevenu").value;
+        const ville = document.getElementById("predVille").value.trim();
+
+        if (!age || !revenu || !ville) {
+            alert("Merci de renseigner l'âge, le revenu et la ville.");
+            return;
+        }
+
+        const resultat = predireProfil(age, revenu, ville);
+        document.getElementById("predOutput").textContent = resultat;
+        document.getElementById("predResult").hidden = false;
+    });
+}
+
+// Simulation : calcule un score fictif à partir des 3 champs
+function predireProfil(age, revenu, ville) {
+    const score = (Number(age) * 0.3 + Number(revenu) / 10000 + ville.length * 2) % 100;
+    const label = score > 60 ? "Profil à fort potentiel" : score > 30 ? "Profil intermédiaire" : "Profil à surveiller";
+    return `${label} — score simulé : ${score.toFixed(1)}/100`;
+}
+
+/* ---------------------------------------------------------
+   INITIALISATION
+   --------------------------------------------------------- */
 renderDashboard();
