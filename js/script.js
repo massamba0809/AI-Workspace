@@ -41,6 +41,9 @@ function goToView(name) {
         case "prediction":
             renderPrediction();
             break;
+        case "historique":
+            renderHistorique();
+            break;
         default:
             renderAVenir(name);
     }
@@ -51,15 +54,201 @@ navItems.forEach(btn => {
 });
 
 /* ---------------------------------------------------------
+   PARTIE 7 — GESTION DE L'HISTORIQUE (localStorage)
+   --------------------------------------------------------- */
+const STORAGE_KEY = "ai-workspace-historique";
+
+function getHistorique() {
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    } catch {
+        return [];
+    }
+}
+
+function saveHistorique(list) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+}
+
+function ajouterHistorique(service, entree, resultat) {
+    const list = getHistorique();
+    list.unshift({
+        id: Date.now() + Math.random().toString(16).slice(2),
+        service,
+        entree,
+        resultat,
+        date: new Date().toLocaleString("fr-FR"),
+    });
+    saveHistorique(list);
+}
+
+function tronquer(str, n) {
+    if (!str) return "";
+    return str.length > n ? str.slice(0, n) + "…" : str;
+}
+
+/* ---------------------------------------------------------
    VUE PAR DÉFAUT : TABLEAU DE BORD (provisoire)
    --------------------------------------------------------- */
 function renderDashboard() {
     mainContent.innerHTML = `
     <p class="view-subtitle">Bienvenue sur votre espace de travail intelligent.</p>
-    <div class="panel">
-      <h2 class="panel__title">À propos de ce tableau de bord</h2>
-      <p>Les statistiques détaillées (requêtes, activité récente) seront branchées
-      sur l'historique réel une fois le module Historique construit.</p>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <span class="stat-card__label">Nombre de jeux de données</span>
+        <span class="stat-card__value">24</span>
+        <span class="stat-card__delta">+3 ce mois-ci</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card__label">Nombre de requêtes</span>
+        <span class="stat-card__value">1,256</span>
+        <span class="stat-card__delta">+18% ce mois-ci</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card__label">Nombre de modèles disponibles</span>
+        <span class="stat-card__value">12</span>
+        <span class="stat-card__delta">+2 ce mois-ci</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card__label">Utilisateurs actifs</span>
+        <span class="stat-card__value">8</span>
+        <span class="stat-card__delta">+2 ce mois-ci</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card__label">Tâches exécutées</span>
+        <span class="stat-card__value">342</span>
+        <span class="stat-card__delta">+22% ce mois-ci</span>
+      </div>
+    </div>
+
+    <div class="panel-grid">
+      <div class="panel">
+        <div class="panel__header">
+          <h2 class="panel__title">Requêtes par jour</h2>
+          <select class="panel__select">
+            <option>7 derniers jours</option>
+            <option>30 derniers jours</option>
+          </select>
+        </div>
+        ${lineChartMarkup()}
+      </div>
+
+      <div class="panel">
+        <h2 class="panel__title">Répartition des requêtes par service</h2>
+        ${donutChartMarkup()}
+      </div>
+    </div>
+
+    <div class="panel-grid">
+      <div class="panel">
+        <h2 class="panel__title">Activité récente</h2>
+        <table class="table">
+          <thead><tr><th>Activité</th><th>Service</th><th>Utilisateur</th><th>Date</th></tr></thead>
+          <tbody>
+            <tr><td>Résumé du document_projet.pdf</td><td>Résumé de texte</td><td>Admin User</td><td>21/05/2024 14:32</td></tr>
+            <tr><td>Classification de sentiments</td><td>Classification</td><td>Admin User</td><td>21/05/2024 14:21</td></tr>
+            <tr><td>Traduction FR → EN</td><td>Traduction</td><td>Admin User</td><td>21/05/2024 14:15</td></tr>
+            <tr><td>Discussion sur l'IA générative</td><td>Chat</td><td>Admin User</td><td>21/05/2024 14:05</td></tr>
+            <tr><td>Génération d'idées de projet</td><td>Idées</td><td>Admin User</td><td>13/05/2024 13:50</td></tr>
+          </tbody>
+        </table>
+        <a class="panel__link" data-view="historique">Voir tout l'historique</a>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel__title">Modèles populaires</h2>
+        <table class="table">
+          <thead><tr><th>Modèle</th><th>Utilisations</th></tr></thead>
+          <tbody>
+            <tr><td>mistral-7b-instruct</td><td>532</td></tr>
+            <tr><td>gpt-4-turbo</td><td>389</td></tr>
+            <tr><td>llama-3-8b</td><td>256</td></tr>
+            <tr><td>bert-base-uncased</td><td>179</td></tr>
+            <tr><td>google-translate-v1</td><td>142</td></tr>
+          </tbody>
+        </table>
+        <a class="panel__link" href="#">Voir tous les modèles</a>
+      </div>
+    </div>
+  `;
+
+    const lienHistorique = mainContent.querySelector('.panel__link[data-view="historique"]');
+    if (lienHistorique) {
+        lienHistorique.addEventListener("click", e => {
+            e.preventDefault();
+            goToView("historique");
+        });
+    }
+}
+
+function lineChartMarkup() {
+    const jours = ["15 Mai", "16 Mai", "17 Mai", "18 Mai", "19 Mai", "20 Mai", "21 Mai"];
+    const valeurs = [150, 200, 160, 225, 260, 285, 310];
+    const maxY = 350;
+    const w = 460, h = 200, padL = 30, padB = 24, padT = 10;
+    const stepX = (w - padL - 10) / (valeurs.length - 1);
+    const points = valeurs.map((v, i) => {
+        const x = padL + i * stepX;
+        const y = padT + (h - padT - padB) * (1 - v / maxY);
+        return `${x},${y}`;
+    }).join(" ");
+
+    const grille = [0, 100, 200, 300].map(v => {
+        const y = padT + (h - padT - padB) * (1 - v / maxY);
+        return `<line x1="${padL}" y1="${y}" x2="${w - 5}" y2="${y}" stroke="var(--line)" stroke-width="1"/>
+            <text x="2" y="${y + 4}" font-size="9" fill="var(--ink-soft)">${v}</text>`;
+    }).join("");
+
+    const labels = jours.map((j, i) => {
+        const x = padL + i * stepX;
+        return `<text x="${x}" y="${h - 4}" font-size="9" fill="var(--ink-soft)" text-anchor="middle">${j}</text>`;
+    }).join("");
+
+    const dots = valeurs.map((v, i) => {
+        const x = padL + i * stepX;
+        const y = padT + (h - padT - padB) * (1 - v / maxY);
+        return `<circle cx="${x}" cy="${y}" r="3" fill="var(--accent)"/>`;
+    }).join("");
+
+    return `
+    <svg viewBox="0 0 ${w} ${h}" class="line-chart">
+      ${grille}
+      <polyline points="${points}" fill="none" stroke="var(--accent)" stroke-width="2"/>
+      ${dots}
+      ${labels}
+    </svg>
+  `;
+}
+
+function donutChartMarkup() {
+    const services = [
+        { label: "Chat", pct: 38, color: "var(--accent)" },
+        { label: "Résumé de texte", pct: 22, color: "#8A6D4B" },
+        { label: "Classification", pct: 18, color: "#6B5B95" },
+        { label: "Traduction", pct: 12, color: "#C9A97E" },
+        { label: "Autres", pct: 10, color: "#B7AFA0" },
+    ];
+
+    let cumule = 0;
+    const segments = services.map(s => {
+        const debut = cumule;
+        cumule += s.pct;
+        return `${s.color} ${debut}% ${cumule}%`;
+    }).join(", ");
+
+    const legende = services.map(s => `
+    <div class="legend-row">
+      <span class="legend-dot" style="background:${s.color}"></span>
+      <span class="legend-label">${s.label}</span>
+      <span class="legend-pct">${s.pct}%</span>
+    </div>
+  `).join("");
+
+    return `
+    <div class="donut-layout">
+      <div class="donut" style="background:conic-gradient(${segments})"></div>
+      <div class="legend">${legende}</div>
     </div>
   `;
 }
@@ -103,6 +292,8 @@ function renderResume() {
         const resultat = resumerTexte(texte);
         document.getElementById("resumeOutput").textContent = resultat;
         document.getElementById("resumeResult").hidden = false;
+
+        ajouterHistorique("Résumé de texte", texte, resultat);
     });
 }
 
@@ -151,6 +342,8 @@ function renderTraduction() {
         const resultat = traduireTexte(texte, langue);
         document.getElementById("traductionOutput").textContent = resultat;
         document.getElementById("traductionResult").hidden = false;
+
+        ajouterHistorique("Traduction", texte, resultat);
     });
 }
 
@@ -214,6 +407,8 @@ function renderChat() {
             const reponse = REPONSES_SIMULEES[Math.floor(Math.random() * REPONSES_SIMULEES.length)];
             chatMessages.insertAdjacentHTML("beforeend", chatMessageMarkup("bot", reponse));
             chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            ajouterHistorique("Chat", message, reponse);
         }, 350);
     });
 }
@@ -267,6 +462,8 @@ function renderPrediction() {
         const resultat = predireProfil(age, revenu, ville);
         document.getElementById("predOutput").textContent = resultat;
         document.getElementById("predResult").hidden = false;
+
+        ajouterHistorique("Prédiction", `Âge ${age}, Revenu ${revenu}, Ville ${ville}`, resultat);
     });
 }
 
@@ -275,6 +472,71 @@ function predireProfil(age, revenu, ville) {
     const score = (Number(age) * 0.3 + Number(revenu) / 10000 + ville.length * 2) % 100;
     const label = score > 60 ? "Profil à fort potentiel" : score > 30 ? "Profil intermédiaire" : "Profil à surveiller";
     return `${label} — score simulé : ${score.toFixed(1)}/100`;
+}
+
+/* ---------------------------------------------------------
+   PARTIE 7 — VUE HISTORIQUE
+   --------------------------------------------------------- */
+function renderHistorique() {
+    mainContent.innerHTML = `
+    <p class="view-subtitle">Retrouvez, recherchez ou supprimez vos requêtes précédentes.</p>
+
+    <div class="historique-toolbar">
+      <input type="search" id="historiqueSearch" placeholder="Rechercher dans l'historique…">
+      <button class="btn btn--danger" id="historiqueClear">Vider l'historique</button>
+    </div>
+
+    <table class="table" id="historiqueTable">
+      <thead>
+        <tr><th>Service</th><th>Entrée</th><th>Résultat</th><th>Date</th><th></th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <p class="empty-hint" id="historiqueVide">Aucune requête enregistrée pour l'instant.</p>
+  `;
+
+    dessinerHistorique();
+
+    document.getElementById("historiqueSearch").addEventListener("input", e => {
+        dessinerHistorique(e.target.value);
+    });
+
+    document.getElementById("historiqueClear").addEventListener("click", () => {
+        if (!confirm("Vider tout l'historique ? Cette action est irréversible.")) return;
+        saveHistorique([]);
+        dessinerHistorique();
+    });
+}
+
+function dessinerHistorique(filtre = "") {
+    const tbody = document.querySelector("#historiqueTable tbody");
+    const vide = document.getElementById("historiqueVide");
+    const list = getHistorique().filter(item => {
+        const cible = `${item.service} ${item.entree} ${item.resultat}`.toLowerCase();
+        return cible.includes(filtre.toLowerCase());
+    });
+
+    tbody.innerHTML = "";
+    vide.hidden = list.length > 0;
+
+    list.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+      <td>${item.service}</td>
+      <td>${tronquer(item.entree, 60)}</td>
+      <td>${tronquer(item.resultat, 60)}</td>
+      <td>${item.date}</td>
+      <td><button class="row-delete" data-id="${item.id}">Supprimer</button></td>
+    `;
+        tbody.appendChild(tr);
+    });
+
+    tbody.querySelectorAll(".row-delete").forEach(btn => {
+        btn.addEventListener("click", () => {
+            saveHistorique(getHistorique().filter(item => item.id !== btn.dataset.id));
+            dessinerHistorique(filtre);
+        });
+    });
 }
 
 /* ---------------------------------------------------------
